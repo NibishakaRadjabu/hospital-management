@@ -40,14 +40,14 @@ $flash = take_flash();
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sign in | KivuCare</title>
+    <title>Sign in | hospital management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/hospital%20management/assets/css/app.css" rel="stylesheet">
 </head>
 <body class="auth-page">
 <main class="auth-card">
     <?= render_language_switcher() ?>
-    <a class="brand" href="/hospital%20management/"><span class="brand-mark">K</span><span>KivuCare<small>HOSPITAL SYSTEM</small></span></a>
+    <a class="brand" href="/hospital%20management/"><span class="brand-mark">H</span><span>Hospital Management<small>HOSPITAL SYSTEM</small></span></a>
     <h1>Welcome back</h1>
     <p class="lead">Sign in to your hospital workspace.</p>
     <?php if ($flash !== null): ?><div class="alert alert-<?= e($flash['type']) ?>"><?= e($flash['message']) ?></div><?php endif; ?>
