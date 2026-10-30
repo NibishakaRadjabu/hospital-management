@@ -44,12 +44,14 @@ try {
         'admitted_by' => current_user()['id'],
         'reason' => $reason,
     ]);
+    $admissionId = (string) $pdo->lastInsertId();
     $update = $pdo->prepare("UPDATE beds SET status = 'occupied' WHERE id = :id AND status = 'available'");
     $update->execute(['id' => $bedId]);
     if ($update->rowCount() !== 1) {
         throw new RuntimeException('Bed availability changed while the admission was being saved.');
     }
-    record_audit('create', 'admission', (string) $pdo->lastInsertId(), 'Patient admitted and bed assigned');
+    record_audit('create', 'admission', $admissionId, 'Patient admitted and bed assigned');
+    notify_staff('patient_admitted', 'admission', $admissionId, current_user()['full_name'] . ' admitted a patient to a ward bed.');
     $pdo->commit();
     set_flash('success', 'Patient admitted and bed assigned.');
     redirect('/hospital%20management/admission/index.php');

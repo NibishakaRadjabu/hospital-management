@@ -92,6 +92,101 @@ function work_log_categories(): array
     ];
 }
 
+function get_hospital_name(): string
+{
+    global $pdo;
+    static $name = null;
+    if ($name === null) {
+        try {
+            $name = (string) $pdo->query(
+                "SELECT setting_value FROM hospital_settings WHERE setting_key = 'hospital_name'"
+            )->fetchColumn();
+        } catch (\Throwable) {
+            $name = 'KivuCare';
+        }
+        if ($name === '' || $name === false) {
+            $name = 'KivuCare';
+        }
+    }
+    return $name;
+}
+
+function get_notification_counts(): array
+{
+    global $pdo;
+    $userId = $_SESSION['user']['id'] ?? null;
+    if (!$userId) {
+        return ['total' => 0, 'by_action' => []];
+    }
+    try {
+        $stmt = $pdo->prepare(
+            'SELECT action, COUNT(*) AS cnt FROM notifications
+             WHERE user_id = :uid AND is_read = 0 GROUP BY action'
+        );
+        $stmt->execute(['uid' => $userId]);
+        $rows = $stmt->fetchAll();
+        $byAction = [];
+        $total = 0;
+        foreach ($rows as $row) {
+            $byAction[$row['action']] = (int) $row['cnt'];
+            $total += (int) $row['cnt'];
+        }
+        return ['total' => $total, 'by_action' => $byAction];
+    } catch (\Throwable) {
+        return ['total' => 0, 'by_action' => []];
+    }
+}
+
+function notify(int $userId, string $action, string $entityType, ?string $entityId, string $message): void
+{
+    global $pdo;
+    try {
+        $pdo->prepare(
+            'INSERT INTO notifications (user_id, action, entity_type, entity_id, message)
+             VALUES (:uid, :action, :entity_type, :entity_id, :message)'
+        )->execute([
+            'uid' => $userId,
+            'action' => $action,
+            'entity_type' => $entityType,
+            'entity_id' => $entityId,
+            'message' => $message,
+        ]);
+    } catch (\Throwable) {
+        // non-fatal
+    }
+}
+
+function notify_staff(string $action, string $entityType, ?string $entityId, string $message): void
+{
+    global $pdo;
+    $actorId = (int) ($_SESSION['user']['id'] ?? 0);
+    try {
+        $stmt = $pdo->prepare(
+            "SELECT u.id FROM users u
+             JOIN roles r ON r.id = u.role_id
+             WHERE u.is_active = 1
+               AND r.role_key <> 'patient_portal'
+               AND u.id <> :actor"
+        );
+        $stmt->execute(['actor' => $actorId]);
+        $insert = $pdo->prepare(
+            'INSERT INTO notifications (user_id, action, entity_type, entity_id, message)
+             VALUES (:uid, :action, :entity_type, :entity_id, :message)'
+        );
+        foreach ($stmt->fetchAll() as $row) {
+            $insert->execute([
+                'uid'         => $row['id'],
+                'action'      => $action,
+                'entity_type' => $entityType,
+                'entity_id'   => $entityId,
+                'message'     => $message,
+            ]);
+        }
+    } catch (\Throwable) {
+        // non-fatal
+    }
+}
+
 function patient_service_categories(): array
 {
     return [

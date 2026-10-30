@@ -71,6 +71,7 @@ try {
             }
         }
         record_audit('update', 'patient', (string) $id, 'Patient profile updated');
+        notify_staff('patient_updated', 'patient', (string) $id, current_user()['full_name'] . ' updated patient record.');
         $pdo->commit();
         set_flash('success', 'Patient details updated.');
         redirect('/hospital%20management/patient/show.php?id=' . $id);
@@ -89,6 +90,7 @@ try {
     $statement->execute($values);
     $patientId = (int) $pdo->lastInsertId();
     record_audit('create', 'patient', (string) $patientId, 'Patient registered');
+    notify_staff('patient_registered', 'patient', (string) $patientId, current_user()['full_name'] . ' registered new patient ' . $patientNo . '.');
     $pdo->commit();
     set_flash('success', 'Patient registered with ID ' . $patientNo . '.');
     redirect('/hospital%20management/patient/show.php?id=' . $patientId);

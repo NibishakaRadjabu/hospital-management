@@ -45,6 +45,17 @@
     });
     window.addEventListener('afterprint', finishPrint);
 })();
+(() => {
+    const bell = document.getElementById('notifBell');
+    if (!bell) return;
+    const open  = () => { bell.classList.add('is-open');    bell.setAttribute('aria-expanded', 'true'); };
+    const close = () => { bell.classList.remove('is-open'); bell.setAttribute('aria-expanded', 'false'); };
+    const toggle = () => bell.classList.contains('is-open') ? close() : open();
+    bell.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
+    bell.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+    document.addEventListener('click', close);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+})();
 </script>
 </body>
 </html>

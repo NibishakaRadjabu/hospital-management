@@ -38,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute(['patient_id' => $patientId, 'doctor_id' => $doctorInput, 'scheduled_at' => $parsed->format('Y-m-d H:i:s'), 'reason' => $reason ?: null]);
         $id = (string) $pdo->lastInsertId();
         record_audit('create', 'appointment', $id, 'Appointment scheduled');
+        notify_staff('appointment_scheduled', 'appointment', $id, current_user()['full_name'] . ' scheduled a new appointment.');
         set_flash('success', 'Appointment scheduled.');
         redirect('/hospital%20management/appointments/index.php');
     }
@@ -52,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($doctorId) { $sql .= ' AND doctor_id = :doctor_id'; $params['doctor_id'] = $doctorId; }
         $stmt = $pdo->prepare($sql); $stmt->execute($params);
         if ($stmt->rowCount()) record_audit('update', 'appointment', (string) $id, 'Appointment status changed to ' . $status);
+        if ($stmt->rowCount()) notify_staff('appointment_updated', 'appointment', (string) $id, current_user()['full_name'] . ' updated an appointment status to ' . str_replace('_', ' ', $status) . '.');
         set_flash($stmt->rowCount() ? 'success' : 'warning', $stmt->rowCount() ? 'Appointment updated.' : 'The appointment was not found or is no longer scheduled.');
         redirect('/hospital%20management/appointments/index.php');
     }

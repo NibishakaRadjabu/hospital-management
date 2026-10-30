@@ -72,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ]);
     $id = (string) $pdo->lastInsertId();
     record_audit('create', 'emergency_triage', $id, 'Emergency triage assessment recorded');
+    notify_staff('triage_recorded', 'emergency_triage', $id, current_user()['full_name'] . ' recorded an emergency triage assessment.');
     set_flash('success', 'Triage assessment recorded. Provide immediate care for life-threatening conditions.');
     redirect('/hospital%20management/emergency/index.php');
 }

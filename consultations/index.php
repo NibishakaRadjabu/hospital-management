@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $q->execute(['patient_id'=>$patientId,'doctor_id'=>$doctorForVisit,'appointment_id'=>$appointmentId?:null,'complaint'=>$complaint?:null,'diagnosis'=>$diagnosis?:null,'notes'=>$notes?:null]);
         $id=(string)$pdo->lastInsertId();
         if ($appointmentId) $pdo->prepare("UPDATE appointments SET status='completed' WHERE id=:id")->execute(['id'=>$appointmentId]);
-        record_audit('create','visit',$id,'Consultation recorded'); $pdo->commit(); set_flash('success','Consultation recorded.');
+        record_audit('create','visit',$id,'Consultation recorded'); notify_staff('consultation_recorded','visit',$id,current_user()['full_name'].' recorded a consultation.'); $pdo->commit(); set_flash('success','Consultation recorded.');
     } catch (Throwable $e) { if($pdo->inTransaction())$pdo->rollBack(); set_flash('danger',$e instanceof RuntimeException?$e->getMessage():'Consultation could not be saved.'); }
     redirect('/hospital%20management/consultations/index.php');
 }
