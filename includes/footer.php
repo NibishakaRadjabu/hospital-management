@@ -3,6 +3,21 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+(function(){
+    var loader = document.getElementById('page-loader');
+    function hide(){ if(loader){ loader.classList.add('loader-done'); setTimeout(function(){ loader.style.display='none'; }, 400); } }
+    if (document.readyState === 'complete') { hide(); }
+    else { window.addEventListener('load', hide); }
+    // also hide on nav links so it shows on next page
+    document.addEventListener('click', function(e){
+        var a = e.target.closest('a[href]');
+        if (a && !a.target && a.href && !a.href.startsWith('javascript') && a.hostname === location.hostname) {
+            if(loader){ loader.style.display='flex'; loader.classList.remove('loader-done'); }
+        }
+    });
+})();
+</script>
+<script>
 (() => {
     const menu = document.getElementById('workspace-menu');
     const toggle = document.querySelector('.mobile-menu-toggle');

@@ -15,6 +15,14 @@ $_notif = get_notification_counts();
     <link href="/hospital%20management/assets/css/app.css" rel="stylesheet">
 </head>
 <body>
+<div id="page-loader">
+    <div class="loader-container">
+        <div class="hospital-icon">&#127973;</div>
+        <h1><?= e($_hospitalName) ?></h1>
+        <p class="loader-tagline">Caring For Life, Every Day</p>
+        <div class="loader-bar"><span></span></div>
+    </div>
+</div>
 <div class="app-shell">
     <button class="mobile-menu-toggle" type="button" aria-controls="workspace-menu" aria-expanded="false">
         <span aria-hidden="true">&#9776;</span><span>Menu</span>
