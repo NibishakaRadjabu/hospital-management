@@ -95,6 +95,7 @@ $_notif = get_notification_counts();
             <?php if (has_permission('attendance.manage') || has_permission('payroll.manage') || has_permission('employees.manage')): ?>
                 <a class="nav-link" href="/hospital%20management/hr/index.php"><span>H</span> Human Resources</a>
             <?php endif; ?>
+            <a class="nav-link" href="/hospital%20management/conference/index.php"><span>&#9742;</span> Conference</a>
             <?php if (has_permission('users.view')): ?>
                 <a class="nav-link" href="/hospital%20management/admin/users.php"><span>♧</span> Staff accounts</a>
             <?php endif; ?>
@@ -170,6 +171,7 @@ $_notif = get_notification_counts();
                                 'inventory_adjusted'    => '/hospital%20management/inventory/index.php',
                                 'equipment_scheduled'   => '/hospital%20management/inventory/equipment.php',
                                 'purchase_order_created'=> '/hospital%20management/inventory/purchases.php',
+                                'conference_invite'     => '/hospital%20management/conference/index.php',
                             ];
                             ?>
                             <?php foreach ($_notif['by_action'] as $action => $count): ?>

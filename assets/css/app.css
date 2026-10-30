@@ -124,6 +124,11 @@ a.avatar:hover { opacity: .8; }
 .brand-edit-save { background: var(--teal); border: none; border-radius: 6px; color: #fff; cursor: pointer; font-size: 11px; font-weight: 600; padding: 5px 10px; }
 .brand-edit-cancel { background: none; border: none; color: #8fa0b0; cursor: pointer; font-size: 14px; padding: 4px; }
 .brand-edit-cancel:hover { color: #fff; }
+.conf-msg { background: #f0f4f8; border-radius: 10px; max-width: 75%; padding: 8px 12px; align-self: flex-start; }
+.conf-msg-self { background: #d6f1e8; align-self: flex-end; }
+.conf-msg-name { color: var(--teal-dark); font-size: 11px; font-weight: 700; margin-right: 6px; }
+.conf-msg-time { color: var(--muted); font-size: 10px; }
+.conf-msg-body { font-size: 13px; margin-top: 3px; word-break: break-word; }
 .auth-page { align-items: center; background: radial-gradient(circle at 72% 15%, #e2f2ef 0, transparent 33%), #f5f7fa; display: flex; justify-content: center; min-height: 100vh; padding: 22px; }
 .auth-card { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 14px 45px rgba(24, 45, 68, .08); max-width: 430px; padding: 37px; width: 100%; }
 .auth-card .brand { color: var(--ink); margin: 0 0 30px; }
