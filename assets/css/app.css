@@ -115,6 +115,15 @@ a.avatar:hover { opacity: .8; }
 .notif-action { color: var(--ink); font-size: 12px; }
 .notif-count { background: #e8f4f1; border-radius: 20px; color: var(--teal-dark); font-size: 11px; font-weight: 700; padding: 2px 8px; }
 .notif-clear { border-top: 1px solid var(--line); padding: 8px 16px; }
+.brand-wrap { align-items: center; display: flex; gap: 6px; margin: 0 0 48px 5px; }
+.brand-wrap .brand { margin: 0; }
+.brand-edit-btn { background: none; border: none; color: #8fa0b0; cursor: pointer; font-size: 14px; flex-shrink: 0; line-height: 1; padding: 4px; }
+.brand-edit-btn:hover { color: #fff; }
+.brand-edit-form { align-items: center; gap: 5px; margin: 0 0 48px; }
+.brand-edit-input { background: #25394e; border: 1px solid #526477; border-radius: 6px; color: #fff; font-size: 13px; min-width: 0; padding: 5px 8px; width: 130px; }
+.brand-edit-save { background: var(--teal); border: none; border-radius: 6px; color: #fff; cursor: pointer; font-size: 11px; font-weight: 600; padding: 5px 10px; }
+.brand-edit-cancel { background: none; border: none; color: #8fa0b0; cursor: pointer; font-size: 14px; padding: 4px; }
+.brand-edit-cancel:hover { color: #fff; }
 .auth-page { align-items: center; background: radial-gradient(circle at 72% 15%, #e2f2ef 0, transparent 33%), #f5f7fa; display: flex; justify-content: center; min-height: 100vh; padding: 22px; }
 .auth-card { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 14px 45px rgba(24, 45, 68, .08); max-width: 430px; padding: 37px; width: 100%; }
 .auth-card .brand { color: var(--ink); margin: 0 0 30px; }

@@ -31,6 +31,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('/hospital%20management/profile.php');
     }
 
+    if ($action === 'payment') {
+        $method  = trim((string) ($_POST['payment_method'] ?? ''));
+        $details = trim((string) ($_POST['payment_details'] ?? ''));
+        $allowed = ['', 'bank_transfer', 'mobile_money', 'paypal', 'other'];
+        if (!in_array($method, $allowed, true) || strlen($details) > 255) {
+            set_flash('danger', 'Check the payment method and details.');
+            redirect('/hospital%20management/profile.php');
+        }
+        $pdo->prepare('UPDATE users SET payment_method = :method, payment_details = :details WHERE id = :id')
+            ->execute(['method' => $method ?: null, 'details' => $details ?: null, 'id' => $userId]);
+        record_audit('update', 'user', (string) $userId, 'Payment method updated');
+        set_flash('success', 'Payment method saved.');
+        redirect('/hospital%20management/profile.php');
+    }
+
     if ($action === 'password') {
         $current = (string) ($_POST['current_password'] ?? '');
         $new     = (string) ($_POST['new_password'] ?? '');
@@ -61,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit('Unknown action.');
 }
 
-$me = $pdo->prepare('SELECT full_name, email, last_login_at FROM users WHERE id = :id');
+$me = $pdo->prepare('SELECT full_name, email, last_login_at, payment_method, payment_details FROM users WHERE id = :id');
 $me->execute(['id' => $userId]);
 $me = $me->fetch();
 
@@ -117,6 +132,35 @@ require __DIR__ . '/includes/header.php';
                     <input class="form-control" id="confirm_password" name="confirm_password" type="password" minlength="12" autocomplete="new-password" required>
                 </div>
                 <button class="btn btn-primary" type="submit">Change password</button>
+            </form>
+        </section>
+    </div>
+</div>
+<div class="row g-3 mt-1">
+    <div class="col-12 col-md-6">
+        <section class="content-card mt-0">
+            <div class="card-heading"><h3>Payment method</h3></div>
+            <form method="post" class="form-card">
+                <?= csrf_field() ?>
+                <input type="hidden" name="action" value="payment">
+                <div class="mb-3">
+                    <label class="form-label" for="payment_method">Payment method</label>
+                    <select class="form-select" id="payment_method" name="payment_method">
+                        <option value="" <?= !$me['payment_method'] ? 'selected' : '' ?>>Not specified</option>
+                        <option value="bank_transfer" <?= $me['payment_method'] === 'bank_transfer' ? 'selected' : '' ?>>Bank transfer</option>
+                        <option value="mobile_money" <?= $me['payment_method'] === 'mobile_money' ? 'selected' : '' ?>>Mobile money</option>
+                        <option value="paypal" <?= $me['payment_method'] === 'paypal' ? 'selected' : '' ?>>PayPal</option>
+                        <option value="other" <?= $me['payment_method'] === 'other' ? 'selected' : '' ?>>Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="payment_details">Payment details</label>
+                    <input class="form-control" id="payment_details" name="payment_details" maxlength="255"
+                           placeholder="Account number, phone, or PayPal email"
+                           value="<?= e($me['payment_details'] ?? '') ?>">
+                    <div class="form-text">Bank account number, mobile money number, PayPal email, or other reference used to pay you.</div>
+                </div>
+                <button class="btn btn-primary" type="submit">Save payment method</button>
             </form>
         </section>
     </div>

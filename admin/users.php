@@ -37,12 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $pdo->beginTransaction();
-            $insert = $pdo->prepare('INSERT INTO users (role_id, full_name, email, password_hash) VALUES (:role_id, :full_name, :email, :password_hash)');
+            $insert = $pdo->prepare('INSERT INTO users (role_id, full_name, email, password_hash, payment_method, payment_details) VALUES (:role_id, :full_name, :email, :password_hash, :payment_method, :payment_details)');
             $insert->execute([
                 'role_id' => $roleId,
                 'full_name' => $name,
                 'email' => $email,
                 'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+                'payment_method' => trim((string) ($_POST['payment_method'] ?? '')) ?: null,
+                'payment_details' => trim((string) ($_POST['payment_details'] ?? '')) ?: null,
             ]);
             $userId = (int) $pdo->lastInsertId();
             if ($roleKey === 'doctor') {
@@ -130,7 +132,7 @@ $patients = $canManagePrivilegedRoles
     ? $pdo->query('SELECT id, patient_no, first_name, last_name FROM patients ORDER BY last_name, first_name')->fetchAll()
     : [];
 $users = $pdo->query(
-    'SELECT u.id, u.full_name, u.email, u.is_active, u.last_login_at, r.name AS role_name, r.role_key
+    'SELECT u.id, u.full_name, u.email, u.is_active, u.last_login_at, u.payment_method, u.payment_details, r.name AS role_name, r.role_key
      FROM users u JOIN roles r ON r.id = u.role_id
      ORDER BY u.created_at DESC'
 )->fetchAll();
@@ -152,6 +154,9 @@ require __DIR__ . '/../includes/header.php';
                 <div class="mb-3"><label class="form-label" for="role_id">Role <span class="text-danger">*</span></label><select class="form-select" id="role_id" name="role_id" required><option value="">Select role</option><?php foreach ($roles as $role): ?><option value="<?= (int) $role['id'] ?>"><?= e($role['name']) ?></option><?php endforeach; ?></select></div>
                 <?php if ($canManagePrivilegedRoles): ?><div class="mb-3"><label class="form-label" for="patient_id">Linked patient (patient portal only)</label><select class="form-select" id="patient_id" name="patient_id"><option value="">Not a patient portal account</option><?php foreach ($patients as $patient): ?><option value="<?= (int) $patient['id'] ?>"><?= e($patient['patient_no'] . ' · ' . $patient['first_name'] . ' ' . $patient['last_name']) ?></option><?php endforeach; ?></select></div><?php endif; ?>
                 <div class="mb-3"><label class="form-label" for="password">Initial password <span class="text-danger">*</span></label><input class="form-control" id="password" name="password" type="password" minlength="12" autocomplete="new-password" required><div class="form-text">At least 12 characters. Share it securely.</div></div>
+                <div class="form-section-title">Payment method</div>
+                <div class="mb-3"><label class="form-label" for="payment_method">Payment method</label><select class="form-select" id="payment_method" name="payment_method"><option value="">Not specified</option><option value="bank_transfer">Bank transfer</option><option value="mobile_money">Mobile money</option><option value="paypal">PayPal</option><option value="other">Other</option></select></div>
+                <div class="mb-3"><label class="form-label" for="payment_details">Payment details</label><input class="form-control" id="payment_details" name="payment_details" maxlength="255" placeholder="Account number, phone, or PayPal email"><div class="form-text">Bank account, mobile money number, PayPal email, or other reference.</div></div>
                 <button class="btn btn-primary w-100" type="submit">Create account</button>
             <?php else: ?>
                 <p class="subtle mb-0">You can review staff accounts but do not have permission to change them.</p>
@@ -161,11 +166,12 @@ require __DIR__ . '/../includes/header.php';
     <div class="col-12 col-xl-8">
         <section class="content-card mt-0">
             <div class="card-heading"><h3>Team access <span class="subtle">(<?= count($users) ?>)</span></h3></div>
-            <div class="table-responsive"><table class="table"><thead><tr><th>Staff member</th><th>Role</th><th>Last sign in</th><th>Status</th><th></th></tr></thead><tbody>
+            <div class="table-responsive"><table class="table"><thead><tr><th>Staff member</th><th>Role</th><th>Payment method</th><th>Last sign in</th><th>Status</th><th></th></tr></thead><tbody>
             <?php foreach ($users as $account): ?>
                 <tr>
                     <td><span class="patient-name"><?= e($account['full_name']) ?></span><br><span class="subtle"><?= e($account['email']) ?></span></td>
                     <td><?= e($account['role_name']) ?></td>
+                    <td><?php if ($account['payment_method']): ?><span class="badge-neutral"><?= e(ucwords(str_replace('_', ' ', $account['payment_method']))) ?></span><?php if ($account['payment_details']): ?><br><span class="subtle"><?= e($account['payment_details']) ?></span><?php endif; ?><?php else: ?><span class="subtle">—</span><?php endif; ?></td>
                     <td><?= $account['last_login_at'] ? e(date('M j, Y · g:i a', strtotime($account['last_login_at']))) : 'Never' ?></td>
                     <td><span class="<?= (int) $account['is_active'] === 1 ? 'badge-soft' : 'badge-neutral' ?>"><?= (int) $account['is_active'] === 1 ? 'Active' : 'Inactive' ?></span></td>
                     <td>

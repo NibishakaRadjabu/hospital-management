@@ -46,6 +46,36 @@
     window.addEventListener('afterprint', finishPrint);
 })();
 (() => {
+    const editBtn = document.getElementById('brand-edit-btn');
+    const brandWrap = document.querySelector('.brand-wrap');
+    const brandLink = brandWrap && brandWrap.querySelector('a.brand');
+    const form = document.getElementById('brand-name-form');
+    const input = document.getElementById('brand-name-input');
+    if (!editBtn || !form || !brandLink) return;
+    editBtn.addEventListener('click', () => {
+        brandWrap.style.display = 'none';
+        form.style.display = 'flex';
+        input.focus(); input.select();
+    });
+    form.querySelector('.brand-edit-cancel').addEventListener('click', () => {
+        form.style.display = 'none';
+        brandWrap.style.display = '';
+    });
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = new FormData(form);
+        const res = await fetch('/hospital%20management/admin/settings.php', { method: 'POST', body: data, redirect: 'error' });
+        if (res.ok) {
+            const name = input.value.trim();
+            brandLink.querySelector('span:last-child').firstChild.textContent = name;
+            brandLink.querySelector('.brand-mark').textContent = name.charAt(0).toUpperCase();
+            document.title = document.title.replace(/\|.*$/, '| ' + name);
+        }
+        form.style.display = 'none';
+        brandWrap.style.display = '';
+    });
+})();
+(() => {
     const bell = document.getElementById('notifBell');
     if (!bell) return;
     const open  = () => { bell.classList.add('is-open');    bell.setAttribute('aria-expanded', 'true'); };

@@ -2,20 +2,27 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/auth.php';
-require_permission('settings.manage');
+require_login();
+$isAdmin = in_array(current_user()['role_key'] ?? '', ['hospital_admin'], true);
+if (!$isAdmin && !has_permission('settings.manage')) {
+    http_response_code(403); exit('You do not have permission to access this page.');
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     $name = trim($_POST['hospital_name'] ?? '');
+    $inline = ($_POST['action'] ?? '') === 'inline';
     if ($name !== '') {
         $pdo->prepare(
             "INSERT INTO hospital_settings (setting_key, setting_value)
              VALUES ('hospital_name', :val)
-             ON DUPLICATE KEY UPDATE setting_value = :val"
-        )->execute(['val' => $name]);
+             ON DUPLICATE KEY UPDATE setting_value = :val2"
+        )->execute(['val' => $name, 'val2' => $name]);
         record_audit('update', 'hospital_settings', 'hospital_name', 'Hospital name changed to: ' . $name);
+        if ($inline) { ob_end_clean(); http_response_code(200); exit; }
         set_flash('success', 'Hospital name updated.');
     } else {
+        if ($inline) { ob_end_clean(); http_response_code(422); exit; }
         set_flash('danger', 'Hospital name cannot be empty.');
     }
     redirect('/hospital%20management/admin/settings.php');

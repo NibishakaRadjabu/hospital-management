@@ -20,7 +20,21 @@ $_notif = get_notification_counts();
         <span aria-hidden="true">&#9776;</span><span>Menu</span>
     </button>
     <aside class="sidebar" id="workspace-menu" aria-label="Workspace navigation">
-        <a class="brand" href="/hospital%20management/dashboard.php"><span class="brand-mark"><?= e(strtoupper(substr($_hospitalName, 0, 1))) ?></span><span><?= e($_hospitalName) ?><small>HOSPITAL SYSTEM</small></span></a>
+        <div class="brand-wrap">
+            <a class="brand" href="/hospital%20management/dashboard.php"><span class="brand-mark"><?= e(strtoupper(substr($_hospitalName, 0, 1))) ?></span><span><?= e($_hospitalName) ?><small>HOSPITAL SYSTEM</small></span></a>
+            <?php if (has_permission('settings.manage') || ($user['role_key'] ?? '') === 'hospital_admin'): ?>
+            <button id="brand-edit-btn" class="brand-edit-btn" title="Edit hospital name">&#9998;</button>
+            <?php endif; ?>
+        </div>
+        <?php if (has_permission('settings.manage') || ($user['role_key'] ?? '') === 'hospital_admin'): ?>
+        <form id="brand-name-form" class="brand-edit-form" style="display:none">
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="inline">
+            <input id="brand-name-input" class="brand-edit-input" name="hospital_name" maxlength="120" value="<?= e($_hospitalName) ?>" required>
+            <button type="submit" class="brand-edit-save">Save</button>
+            <button type="button" class="brand-edit-cancel">&#10005;</button>
+        </form>
+        <?php endif; ?>
         <div class="nav-label">WORKSPACE</div>
         <nav class="nav flex-column">
             <a class="nav-link" href="/hospital%20management/dashboard.php"><span>▦</span> Dashboard</a>
@@ -93,7 +107,7 @@ $_notif = get_notification_counts();
             <?php if (has_permission('audit.view')): ?>
                 <a class="nav-link" href="/hospital%20management/admin/audit.php"><span>◷</span> Audit activity</a>
             <?php endif; ?>
-            <?php if (has_permission('settings.manage')): ?>
+            <?php if (has_permission('settings.manage') || ($user['role_key'] ?? '') === 'hospital_admin'): ?>
                 <a class="nav-link" href="/hospital%20management/admin/settings.php"><span>⚙</span> Hospital settings</a>
             <?php endif; ?>
         </nav>
