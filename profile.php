@@ -72,6 +72,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('/hospital%20management/profile.php');
     }
 
+    if ($action === 'delete') {
+        $current = (string) ($_POST['current_password'] ?? '');
+        $row = $pdo->prepare('SELECT password_hash FROM users WHERE id = :id');
+        $row->execute(['id' => $userId]);
+        $hash = $row->fetchColumn();
+        if (!$hash || !password_verify($current, $hash)) {
+            set_flash('danger', 'Current password is incorrect.');
+            redirect('/hospital%20management/profile.php');
+        }
+        $roleKey = current_user()['role_key'] ?? '';
+        if (in_array($roleKey, ['super_admin', 'admin'], true)) {
+            $count = (int) $pdo->query("SELECT COUNT(*) FROM users u JOIN roles r ON r.id=u.role_id WHERE r.role_key='{$roleKey}' AND u.is_active=1")->fetchColumn();
+            if ($count <= 1) {
+                set_flash('danger', 'You are the last active administrator. Transfer the role before deleting your account.');
+                redirect('/hospital%20management/profile.php');
+            }
+        }
+        $pdo->prepare('DELETE FROM users WHERE id = :id')->execute(['id' => $userId]);
+        record_audit('delete', 'user', (string) $userId, 'User deleted own account');
+        $_SESSION = [];
+        session_regenerate_id(true);
+        redirect('/hospital%20management/login.php');
+    }
+
     http_response_code(400);
     exit('Unknown action.');
 }
@@ -161,6 +185,22 @@ require __DIR__ . '/includes/header.php';
                     <div class="form-text">Bank account number, mobile money number, PayPal email, or other reference used to pay you.</div>
                 </div>
                 <button class="btn btn-primary" type="submit">Save payment method</button>
+            </form>
+        </section>
+    </div>
+</div>
+<div class="row g-3 mt-1">
+    <div class="col-12 col-md-6">
+        <section class="content-card mt-0">
+            <div class="card-heading"><h3>Delete account</h3></div>
+            <form method="post" class="form-card" onsubmit="return confirm('Permanently delete your account? This cannot be undone.')">
+                <?= csrf_field() ?>
+                <input type="hidden" name="action" value="delete">
+                <div class="mb-3">
+                    <label class="form-label" for="delete_password">Confirm your password <span class="text-danger">*</span></label>
+                    <input class="form-control" id="delete_password" name="current_password" type="password" autocomplete="current-password" required>
+                </div>
+                <button class="btn btn-danger" type="submit">Delete my account</button>
             </form>
         </section>
     </div>

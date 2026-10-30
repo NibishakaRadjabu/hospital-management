@@ -162,6 +162,14 @@ $_notif = get_notification_counts();
                                 'purchase_order_created'=> '/hospital%20management/inventory/purchases.php',
                                 'attendance_recorded'   => '/hospital%20management/hr/index.php',
                                 'payroll_prepared'      => '/hospital%20management/hr/index.php',
+                                'nursing_note_recorded' => '/hospital%20management/nursing/index.php',
+                                'radiology_requested'   => '/hospital%20management/radiology/index.php',
+                                'radiology_reported'    => '/hospital%20management/radiology/index.php',
+                                'ambulance_requested'   => '/hospital%20management/ambulance/index.php',
+                                'ambulance_updated'     => '/hospital%20management/ambulance/index.php',
+                                'inventory_adjusted'    => '/hospital%20management/inventory/index.php',
+                                'equipment_scheduled'   => '/hospital%20management/inventory/equipment.php',
+                                'purchase_order_created'=> '/hospital%20management/inventory/purchases.php',
                             ];
                             ?>
                             <?php foreach ($_notif['by_action'] as $action => $count): ?>
